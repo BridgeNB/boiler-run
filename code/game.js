@@ -8,8 +8,11 @@ $(document).ready(function(){
   //Lets save the cell width in a variable for easy control
   var cw = 10;
   var d;
-  var food;
+  var coin_array = [];
+  var coin_num = 40;
+  var snake;
   var score;
+  //Map
   var map =
   [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 [1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,0,1,1,1,1,1,1,0,1,1,1,1,1,1,0],
@@ -68,14 +71,11 @@ $(document).ready(function(){
 [1,1,0,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,0],
 [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]];
 
-  //Lets create the snake now
-  var snake_array; //an array of cells to make up the snake
-
   function init()
   {
     d = "right"; //default direction
     create_snake();
-    create_food(); //Now we can see the food particle
+    create_coin(); //Now we can see the food particle
     //finally lets display the score
     score = 0;
 
@@ -90,20 +90,25 @@ $(document).ready(function(){
   {
     var length = 1; //Length of the snake
     snake = {x: 1, y: 1}; //Empty array to start with
-    // for(var i = length; i > 0; i--)
-    // {
-    //   //This will create a horizontal snake starting from the top left
-    //   snake_array.push({x: i, y: 1});
-    // }
   }
 
   //Lets create the food now
-  function create_food()
+  function create_coin()
   {
-    food = {
-      x: Math.round(Math.random()*(w-cw)/cw),
-      y: Math.round(Math.random()*(h-cw)/cw),
-    };
+    var i = 0;
+    // Put 40 coins in total
+    while (true) {
+        var xtem = Math.round(Math.random()*(w-cw)/cw);
+        var ytem = Math.round(Math.random()*(h-cw)/cw);
+        if (map[ytem][xtem] != 2) {
+          coin_array[i] = {
+            x: xtem,
+            y: ytem,
+          };
+          i++;
+        }
+        if (i == coin_num) break;
+    }
     //This will create a cell with x/y between 0-44
     //Because there are 45(450/10) positions accross the rows and columns
   }
@@ -121,6 +126,7 @@ $(document).ready(function(){
     //Create the map
     for (var i = 0; i<map.length; i++) {
       for (var j = 0; j < map[i].length; j++) {
+        // Draw map
         if (map[i][j] == 0) {
           ctx.fillStyle = "rgb(220,220,220)";
           ctx.fillRect(j*cw, i*cw, cw, cw);
@@ -134,26 +140,15 @@ $(document).ready(function(){
       }
     }
 
-    //Paint the snake
-    paint_cell(snake.x, snake.y);
+    //Paint the eater
+    paint_cell(snake.x, snake.y, "black");
 
-    // //The movement code for the snake to come here.
-    // //The logic is simple
-    // //Pop out the tail cell and place it infront of the head cell
-    // var nx = snake_array[0].x;
-    // var ny = snake_array[0].y;
+    //Paint the coin
+    for(var x = 0; x < coin_num; x++) {
+        paint_cell(coin_array[x].x, coin_array[x].y, "gold");
+    }
 
-    // //These were the position of the head cell.
-    // //We will increment it to get the new head position
-    // //Lets add proper direction based movement now
 
-    // if(d == "right") nx;
-    // else if(d == "left") nx;
-    // else if(d == "up") ny;
-    // else if(d == "down") ny;
-
-    // console.log("nx " + nx + "\n");
-    // console.log("ny " + ny);
 
     //Lets add the game over clauses now
     //This will restart the game if the snake hits the wall
@@ -194,32 +189,19 @@ $(document).ready(function(){
     //   paint_cell(c.x, c.y);
     // }
 
-    //Lets paint the food
-    paint_cell(food.x, food.y);
+
     //Lets paint the score
     var score_text = "Score: " + score;
     ctx.fillText(score_text, 5, h-5);
   }
 
   //Lets first create a generic function to paint cells
-  function paint_cell(x, y)
+  function paint_cell(x, y, color)
   {
-    ctx.fillStyle = "black";
+    ctx.fillStyle = color;
     ctx.fillRect(x*cw, y*cw, cw, cw);
     ctx.strokeStyle = "white";
     ctx.strokeRect(x*cw, y*cw, cw, cw);
-  }
-
-  function check_collision(x, y, array)
-  {
-    //This function will check if the provided x/y coordinates exist
-    //in an array of cells or not
-    for(var i = 0; i < array.length; i++)
-    {
-      if(array[i].x == x && array[i].y == y)
-       return true;
-    }
-    return false;
   }
 
   //Lets add the keyboard controls now
@@ -232,11 +214,5 @@ $(document).ready(function(){
     else if(key == "40") snake.y++; //Down
     //The snake is now keyboard controllable
   })
-
-
-
-
-
-
 
 })
